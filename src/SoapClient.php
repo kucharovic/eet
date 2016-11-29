@@ -3,17 +3,15 @@
 namespace Ondrejnov\EET;
 
 use Ondrejnov\EET\Exceptions\ClientException;
+use Ondrejnov\EET\Pkcs12;
 use RobRichards\WsePhp\WSSESoap;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 class SoapClient extends \SoapClient {
 
-    /** @var string */
-    private $key;
-
-    /** @var string */
-    private $cert;
+    /** @var \Ondrejnov\EET\Pkcs12 */
+    private $pkcs12;
 
     /** @var boolean */
     private $traceRequired;
@@ -42,20 +40,17 @@ class SoapClient extends \SoapClient {
 	private $connectTimeout = 2000;
 
     /**
-     * 
      * @param string $service
-     * @param string $key
-     * @param string $cert
+     * @param Pkcs12 $pkcs12
      * @param boolean $trace
      */
-    public function __construct($service, $key, $cert, $trace = FALSE) {
+    public function __construct($service, Pkcs12 $pkcs12, $trace = FALSE) {
         $this->connectionStartTime = microtime(TRUE);
         parent::__construct($service, [
             'exceptions' => TRUE,
             'trace' => $trace
         ]);
-        $this->key = $key;
-        $this->cert = $cert;
+        $this->pkcs12 = $pkcs12;
         $this->traceRequired = $trace;
     }
 
@@ -68,10 +63,10 @@ class SoapClient extends \SoapClient {
 		$objWSSE->addTimestamp();
 
 		$objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
-		$objKey->loadKey($this->key, TRUE);
+		$objKey->loadKey($this->pkcs12->getPrivateKey());
 		$objWSSE->signSoapDoc($objKey, ["algorithm" => XMLSecurityDSig::SHA256]);
 
-		$token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
+		$token = $objWSSE->addBinaryToken($this->pkcs12->getCertificate());
 		$objWSSE->attachTokentoSig($token);
 
 		return $objWSSE->saveXML();

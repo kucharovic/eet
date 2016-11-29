@@ -7,6 +7,7 @@ use Ondrejnov\EET\Exceptions\RequirementsException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\SoapClient;
 use Ondrejnov\EET\Utils\Format;
+use Ondrejnov\EET\Pkcs12;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 /**
@@ -15,16 +16,10 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
 class Dispatcher {
 
     /**
-     * Certificate key
-     * @var string
+     * Pkcs12
+     * @var \Ondrejnov\EET\Pkcs12
      */
-    private $key;
-
-    /**
-     * Certificate
-     * @var string
-     */
-    private $cert;
+    private $pkcs12;
 
     /**
      * WSDL path or URL
@@ -48,10 +43,9 @@ class Dispatcher {
      * @param string $key
      * @param string $cert
      */
-    public function __construct($service, $key, $cert) {
+    public function __construct($service, $pkcs12) {
         $this->service = $service;
-        $this->key = $key;
-        $this->cert = $cert;
+        $this->pkcs12 = $pkcs12;
         $this->checkRequirements();
     }
 
@@ -121,7 +115,7 @@ class Dispatcher {
      */
     public function getCheckCodes(Receipt $receipt) {
         $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
-        $objKey->loadKey($this->key, TRUE);
+        $objKey->loadKey($this->pkcs12->getPrivateKey());
 
         $arr = [
             $receipt->dic_popl,
@@ -192,7 +186,7 @@ class Dispatcher {
      */
     private function initSoapClient() {
     	if ($this->soapClient === NULL) {
-			$this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
+			$this->soapClient = new SoapClient($this->service, $this->pkcs12, $this->trace);
 		}
     }
 

@@ -3,17 +3,20 @@
 require_once __DIR__ . "/../bootstrap.php";
 
 use Ondrejnov\EET\Exceptions\ServerException;
+use Ondrejnov\EET\Pkcs12;
 use Ondrejnov\EET\Dispatcher;
 use Ondrejnov\EET\Receipt;
 use Ondrejnov\EET\Utils\UUID;
 
-$dispatcher = new Dispatcher(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
+$pkcs12 = new Pkcs12(DIR_CERT . '/EET_CA1_Playground-CZ00000019.p12', 'eet');
+
+$dispatcher = new Dispatcher(PLAYGROUND_WSDL, $pkcs12);
 $dispatcher->trace = TRUE;
 
 // Example receipt
 $r = new Receipt();
 $r->uuid_zpravy = UUID::v4();
-$r->dic_popl = 'CZ72080043';
+$r->dic_popl = 'CZ00000019';
 $r->id_provoz = '181';
 $r->id_pokl = '1';
 $r->porad_cis = '1';
