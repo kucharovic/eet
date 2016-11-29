@@ -27,6 +27,11 @@ use Ondrejnov\EET\Pkcs12;
 use Ondrejnov\EET\Utils\UUID;
 
 $pkcs12 = new Pkcs12(DIR_CERT . '/EET_CA1_Playground-CZ00000019.p12', 'eet');
+// or load separately from somewhere
+$pkcs12 = new Pkcs12();
+$pkcs12->setPrivateKey($key);
+$pkcs12->setCertificate($cert);
+
 $dispatcher = new Dispatcher(PLAYGROUND_WSDL, $pkcs12);
 
 $r = new Receipt();
