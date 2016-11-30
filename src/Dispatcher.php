@@ -15,6 +15,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  */
 class Dispatcher {
 
+    const SERVICE_PLAYGROUND = __DIR__ . '/Schema/PlaygroundService.wsdl';
+    const SERVICE_PRODUCTION = __DIR__ . '/Schema/ProductionService.wsdl';
+
     /**
      * Pkcs12
      * @var \Ondrejnov\EET\Pkcs12
