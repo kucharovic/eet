@@ -36,6 +36,16 @@ class Dispatcher {
     public $trace;
 
     /**
+     * @var array
+     */
+    private $requestData;
+
+    /**
+     * @var array
+     */
+    private $responseData;
+
+    /**
      *
      * @var SoapClient
      */
@@ -154,11 +164,11 @@ class Dispatcher {
     public function send(Receipt $receipt, $check = FALSE) {
         $this->initSoapClient();
 
-        $response = $this->processData($receipt, $check);
+        $this->responseData = $this->processData($receipt, $check);
 
-        isset($response->Chyba) && $this->processError($response->Chyba);
+        isset($this->responseData->Chyba) && $this->processError($this->responseData->Chyba);
 
-        return $check ? TRUE : $response->Potvrzeni->fik;
+        return $check ? TRUE : $this->responseData->Potvrzeni->fik;
     }
 
     /**
@@ -239,9 +249,9 @@ class Dispatcher {
      * @return object
      */
     private function processData(Receipt $receipt, $check = FALSE) {
-        $data = $this->prepareData($receipt, $check);
+        $this->requestData = $this->prepareData($receipt, $check);
 
-        return $this->getSoapClient()->OdeslaniTrzby($data);
+        return $this->getSoapClient()->OdeslaniTrzby($this->requestData);
     }
 
     /**
@@ -265,4 +275,17 @@ class Dispatcher {
         }
     }
 
+    /**
+     * @return array
+     */
+    public function getRequestData() {
+        return $this->requestData;
+    }
+
+    /**
+     * @return stdClass
+     */
+    public function getResponseData() {
+        return $this->responseData;
+    }
 }
